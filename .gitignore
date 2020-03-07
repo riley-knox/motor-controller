@@ -1,0 +1,10 @@
+# auto-generated compilation files
+*.hex
+*.map
+*.o
+*.elf
+*.dep
+*.dis
+
+# HW exercises document
+project_exercises.odt
