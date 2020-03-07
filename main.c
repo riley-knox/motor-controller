@@ -1,4 +1,5 @@
 #include "NU32.h"
+#include <stdio.h>
 
 #define BUF_SIZE 200
 
@@ -19,11 +20,21 @@ int main(void){
         NU32_LED2 = 1;                      // clear error LED
 
         switch (buffer[0]){
-            // case 'a': {
-                //
-            // }
-
-            default:{
+            case 'd':
+            {
+                int n = 0;
+                NU32_ReadUART3(buffer, BUF_SIZE);
+                sscanf(buffer, "%d", &n);
+                sprintf(buffer, "%d\r\n", n+1);
+                NU32_WriteUART3(buffer);
+                break;
+            }
+            case 'q':
+            {
+                break;
+            }
+            default:
+            {
                 NU32_LED2 = 0;              // turn on error LED
                 break;
             }
