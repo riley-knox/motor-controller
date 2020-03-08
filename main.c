@@ -3,6 +3,8 @@
 #include "encoder.h"
 
 #define BUF_SIZE 200
+#define DEG_PER_COUNT 0.9375
+#define HOME_POS 32768
 
 int main(void){
     char buffer[BUF_SIZE];
@@ -23,18 +25,16 @@ int main(void){
         switch (buffer[0]){
             case 'c':                       // reads the encoder count
             {
-                // int ecount = encoder_counts();      // get encoder count
                 sprintf(buffer, "%d\r\n", encoder_counts());  // print count to string
                 NU32_WriteUART3(buffer);            // serial write
                 break;
             }
-            case 'd':                       // dummy function
+            case 'd':                       // read encoder count in degrees
             {
-                int n = 0;
-                NU32_ReadUART3(buffer, BUF_SIZE);
-                sscanf(buffer, "%d", &n);
-                sprintf(buffer, "%d\r\n", n+1);
-                NU32_WriteUART3(buffer);
+                int count = encoder_counts() - HOME_POS;    // number of counts away from "home"
+                float deg = count*DEG_PER_COUNT;            // convert counts -> degrees
+                sprintf(buffer, "%6.2f\r\n", deg);          // print to string
+                NU32_WriteUART3(buffer);                    // serial write
                 break;
             }
             case 'e':                       // resets the encoder count

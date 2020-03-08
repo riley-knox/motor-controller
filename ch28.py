@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from __future__ import print_function
 import serial
 ser = serial.Serial('/dev/ttyUSB0',230400,rtscts=1)
 print('Opening port: ')
@@ -10,7 +11,7 @@ has_quit = False
 while not has_quit:
     print('PIC32 MOTOR DRIVER INTERFACE')
     # display the menu options; this list will grow
-    print('\tc: Read Encoder Count \td: Dummy Command'
+    print('\tc: Read Encoder Count \td: Read Encoder Count (degrees)'
           '\n\te: Reset Encoder Count\tq: Quit'
           '\n\tx: Sum') # '\t' is a tab
     # read the user's choice
@@ -28,14 +29,12 @@ while not has_quit:
 
     elif selection == 'd':
         # example operation
-        n_str = input('Enter number: ') # get the number to send
-        n_int = int(n_str) # turn it into an int
-        print('number = ' + str(n_int)) # print it to the screen to double check
+        print('Positive angles are counter-clockwise.\n')
 
-        ser.write((str(n_int)+'\n').encode()) # send the number
-        n_str = ser.read_until(b'\n')  # get the incremented number back
-        n_int = int(n_str) # turn it into an int
-        print('Got back: ' + str(n_int) + '\n') # print it to the screen
+        count_str = ser.read_until(b'\n')  # get the incremented number back
+        count_float = float(count_str) # turn it into an int
+
+        print('The motor angle is ' + str(count_float) + ' degrees.\n') # print it to the screen
 
     elif selection == 'e':
         # reset encoder count
