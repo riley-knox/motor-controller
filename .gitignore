@@ -6,5 +6,9 @@
 *.dep
 *.dis
 
-# HW exercises document
+# HW documents
+adc_calibration.ods
 project_exercises.odt
+
+# PDF files
+*.pdf

@@ -11,9 +11,9 @@ has_quit = False
 while not has_quit:
     print('PIC32 MOTOR DRIVER INTERFACE')
     # display the menu options; this list will grow
-    print('\tc: Read Encoder Count \td: Read Encoder Count (degrees)'
-          '\n\te: Reset Encoder Count\tq: Quit'
-          '\n\tx: Sum') # '\t' is a tab
+    print('\ta: Read Current Sensor Count \tb: Read Current Sensor (mA)'
+          '\n\tc: Read Encoder Count \t\td: Read Encoder Count (degrees)'
+          '\n\te: Reset Encoder Count \t\tq: Quit')
     # read the user's choice
     selection = input('\nENTER COMMAND: ')
     selection_endline = selection+'\n'
@@ -22,7 +22,17 @@ while not has_quit:
     ser.write(selection_endline.encode()) # .encode() turns the string into a chararray
     # take the appropriate action
     # there is no switch() in python, using if elif instead
-    if selection == 'c':
+    if selection == 'a':
+        # get current counts
+        current_counts = int(ser.read_until(b'\n'))
+        print('The motor current is ' + str(current_counts) + ' ADC counts.\n')
+
+    elif selection == 'b':
+        # get current value in mA
+        current_amps = float(ser.read_until(b'\n'))
+        print('The motor current is ' + str(current_amps) + ' mA.\n')
+
+    elif selection == 'c':
         # get encoder counts function
         count_int = int(ser.read_until(b'\n'))
         print('The motor angle is ' + str(count_int) + ' counts.\n')
@@ -30,10 +40,8 @@ while not has_quit:
     elif selection == 'd':
         # example operation
         print('Positive angles are counter-clockwise.\n')
-
         count_str = ser.read_until(b'\n')  # get the incremented number back
         count_float = float(count_str) # turn it into an int
-
         print('The motor angle is ' + str(count_float) + ' degrees.\n') # print it to the screen
 
     elif selection == 'e':
@@ -45,22 +53,6 @@ while not has_quit:
         has_quit = True # exit client
         # be sure to close the port
         ser.close()
-
-    elif selection == 'x':
-        m_str = input('Enter first number: ')   # get first number to send
-        m_int = int(m_str)                      # turn it into an int
-        n_str = input('Enter second number: ')  # get second number to send
-        n_int = int(n_str)                      # turn it into an int
-        print('number 1 = ' + str(m_int))       # print numbers to screen
-        print('number 2 = ' + str(n_int))
-
-        ser.write((m_str+'\n').encode())        # send numbers to PIC32
-        ser.write((n_str+'\n').encode())
-
-        s_str = ser.read_until(b'\n')           # get sum back
-        s_int = int(s_str)                      # turn sum into int
-
-        print('Got back: ' + str(s_int) + '\n') # print to screen
 
     else:
         print('Invalid Selection ' + selection_endline)
