@@ -13,18 +13,8 @@ void ADC_init(void){
 }
 
 unsigned int ADC_read(int pin){
-    // unsigned int t_run = 0;
-    // unsigned int t_end;
-
     AD1CHSbits.CH0SA = pin;                 // pin to sample
     AD1CON1bits.SAMP = 1;                   // start sampling
-
-    // t_run = _CP0_GET_COUNT();               // get current core timer count
-    // t_end = t_run + SAMPLE_TIME;            // sampling time = 250 ns
-
-    // while (_CP0_GET_COUNT() < t_end) { ; }  // sample for 250 ns
-
-    // AD1CON1bits.SAMP = 0;                   // stop sampling, start converting
 
     while (!AD1CON1bits.DONE) { ; }         // wait for conversion
 

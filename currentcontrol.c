@@ -2,6 +2,7 @@
 #include "currentcontrol.h"
 
 void currentcontrol_init(void) {
+    AD1PCFGbits.PCFG15 = 1;     // set pin B15 as digital pin
     TRISBbits.TRISB15 = 0;      // set pin B15 as digital output
 
     // Timer2 (5 kHz)
@@ -16,7 +17,7 @@ void currentcontrol_init(void) {
 
     // Timer3 (20 kHz)
     T3CONbits.TCKPS = 0;        // Timer3 prescale = 1
-    PR3 = 3999;                 // set PR3 to 4000 - 1 for 20 kHz
+    PR3 = PERIOD_REG;           // set PR3 to 4000 - 1 for 20 kHz
     TMR3 = 0;
     OC1CONbits.OCTSEL = 1;      // use Timer3 as clock source for OC1
     OC1CONbits.OCM = 0b110;     // OC1 in PWM mode, no fault pin
@@ -24,4 +25,13 @@ void currentcontrol_init(void) {
     OC1R = 1000;
     T3CONbits.ON = 1;           // enable Timer3
     OC1CONbits.ON = 1;          // enable OC1
+}
+
+void set_currentgains(float p, float i) {
+    curr_gains.Kp = p;
+    curr_gains.Ki = i;
+}
+
+gain_struct get_currentgains(void) {
+    return curr_gains;
 }
