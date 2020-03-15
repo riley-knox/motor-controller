@@ -42,7 +42,6 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) CurrentControl(void) {
     static float reference_current = 200;       // reference current for ITEST
     static float actual_current = 0;            // measured current
     static int i;                               // number of samples processed in ITEST
-    char buf2[BUF_SIZE];
 
     switch (m) {
         case IDLE:
