@@ -22,6 +22,7 @@ while not has_quit:
           '\n\tc: Read Encoder Count \t\td: Read Encoder Count (degrees)'
           '\n\te: Reset Encoder Count \t\tf: Set PWM (-100 to 100)'
           '\n\tg: Set Current Gains \t\th: Get Current Gains'
+          '\n\ti: Set Position Gains \t\tj: Get Position Gains'
           '\n\tk: Test Current Control'
           '\n\tp: Unpower the Motor \t\tq: Quit'
           '\n\tr: Get Operating Mode')
@@ -76,11 +77,25 @@ while not has_quit:
         K_i = str(float(ser.read_until(b'\n')))
         print('The current controller is using Kp = ' + K_p + ' and Ki = ' + K_i + '.\n')
 
-    # elif selection == 'i':          # set position gains
+    elif selection == 'i':          # set position gains
+        K_p = input('Enter your desired Kp position gain: ')
+        K_i = input('Enter your desired Ki position gain: ')
+        K_d = input('Enter your desired Kd position gain: ')
+        print('Sending Kp = ' + K_p + ', Ki = ' + K_i + ', and Kd = ' + K_d + ' to the position controller.\n')
+        ser.write((K_p + '\n').encode())
+        ser.write((K_i + '\n').encode())
+        ser.write((K_d + '\n').encode())
 
-    # elif selection == 'j':          # get position gains
+    elif selection == 'j':          # get position gains
+        data_read = ser.read_until(b'\n')
+        data_text = str(data_read, 'utf-8')
+        data = list(map(float, data_text.split()))
 
-    elif selection == 'k':            # test current control
+        Kp, Ki, Kd = str(data[0]), str(data[1]), str(data[2])
+
+        print('The position controller is using Kp = ' + Kp + ', Ki = ' + Ki + ', and Kd = ' + Kd + '.\n')
+
+    elif selection == 'k':          # test current control
         print("Testing current control. Press 'q' to close plot.\n")
 
         time_vec = []                           # list of time points

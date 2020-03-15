@@ -2,7 +2,6 @@
 #include <xc.h>
 
 enum avail_modes mode;
-static volatile int Waveform[NUM_SAMPS];
 
 int get_mode(void) {
     return mode;

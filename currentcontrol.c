@@ -30,6 +30,7 @@ void currentcontrol_init(void) {
 void set_currentgains(float p, float i) {
     curr_gains.Kp = p;
     curr_gains.Ki = i;
+    curr_gains.Kd = 0.0;
 }
 
 gain_struct get_currentgains(void) {

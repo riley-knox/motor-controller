@@ -4,7 +4,7 @@
 #define PERIOD_REG 3999
 
 typedef struct {
-    float Kp, Ki;
+    float Kp, Ki, Kd;
 } gain_struct;
 
 gain_struct curr_gains;

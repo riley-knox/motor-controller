@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "encoder.h"
 #include "currentcontrol.h"
+#include "positioncontrol.h"
 #include "isense.h"
 #include "utilities.h"
 
@@ -18,7 +19,7 @@ volatile int f;                         // duty cycle percentage
 static volatile int eint_current;       // current control error integral
 static volatile int StoringData = 0;    // "storing plot data" flag
 
-int avg_counts(int pin){            // get average value from 3 ADC readings
+int avg_counts(int pin){                // get average value from 3 ADC readings
     int count1, count2, count3;
 
     count1 = ADC_read(pin);
@@ -30,7 +31,7 @@ int avg_counts(int pin){            // get average value from 3 ADC readings
     return average;
 }
 
-float counts_to_current(int count) {
+float counts_to_current(int count) {        // convert current ADC count to milliamps
     float amps = CURR_M*count - CURR_B;
     return amps;
 }
@@ -41,6 +42,7 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) CurrentControl(void) {
     static float reference_current = 200;       // reference current for ITEST
     static float actual_current = 0;            // measured current
     static int i;                               // number of samples processed in ITEST
+    char buf2[BUF_SIZE];
 
     switch (m) {
         case IDLE:
@@ -77,7 +79,7 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) CurrentControl(void) {
                 // PI control
                 float err = reference_current - actual_current;                     // error
                 eint_current = eint_current + err;                                  // update error integral
-                float control = curr_gains.Kp*err + curr_gains.Ki*eint_current;     // update control
+                float control = (curr_gains.Kp*err) + (curr_gains.Ki*eint_current);     // update control
 
                 // calculate new PWM value
                 float control_PWM = ((control/1000)/3.3)*100;   // count --> percentage
@@ -91,11 +93,11 @@ void __ISR(_TIMER_2_VECTOR, IPL5SOFT) CurrentControl(void) {
 
                 // set new PWM value
                 if (control_PWM < 0) {
-                    MOTOR_DIR = 1;                  // reverse direction if control signal negative
+                    MOTOR_DIR = 0;                  // forward direction if control signal negative
                     OC1RS = ((-control_PWM/100.0)*PERIOD_REG);
                 }
                 else {
-                    MOTOR_DIR = 0;                  // positive direction
+                    MOTOR_DIR = 1;                  // reverse direction
                     OC1RS = ((control_PWM/100.0)*PERIOD_REG);
                 }
 
@@ -132,6 +134,7 @@ int main(void){
     currentcontrol_init();              // initialize current control timers & output compare
     set_mode(0);                        // set mode to IDLE on startup
     set_currentgains(0.0, 0.0);         // initialize Kp & Ki for current control
+    set_positiongains(0.0, 0.0, 0.0);   // initialize Kp, Ki, Kd for position control
     __builtin_enable_interrupts();      // re-enable interrupts at CPU
 
     while(1){
@@ -190,20 +193,27 @@ int main(void){
             }
             case 'h':                       // get current gains
             {
-                // gain_struct current_gains = get_currentgains();
                 sprintf(buffer, "%f\r\n", curr_gains.Kp);
                 NU32_WriteUART3(buffer);
                 sprintf(buffer, "%f\r\n", curr_gains.Ki);
                 NU32_WriteUART3(buffer);
                 break;
             }
-            case 'i':
+            case 'i':                       // set position gains
             {
-                ;
+                NU32_ReadUART3(buffer, BUF_SIZE);
+                sscanf(buffer, "%f", &pos_gains.Kp);
+                NU32_ReadUART3(buffer, BUF_SIZE);
+                sscanf(buffer, "%f", &pos_gains.Ki);
+                NU32_ReadUART3(buffer, BUF_SIZE);
+                sscanf(buffer, "%f", &pos_gains.Kd);
+                break;
             }
-            case 'j':
+            case 'j':                       // get position gains
             {
-                ;
+                sprintf(buffer, "%6.2f %6.2f %6.2f\r\n", pos_gains.Kp, pos_gains.Ki, pos_gains.Kd);
+                NU32_WriteUART3(buffer);
+                break;
             }
             case 'k':                       // test current control
             {
@@ -224,7 +234,7 @@ int main(void){
                 __builtin_enable_interrupts();
                 break;
             }
-            case 'l':
+            case 'l':                       // go to angle (degree)
             {
                 ;
             }
